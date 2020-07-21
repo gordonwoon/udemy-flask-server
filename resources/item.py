@@ -8,7 +8,6 @@ from flask_jwt_extended import (
 )
 from models.item import ItemModel
 
-
 class Item(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument(

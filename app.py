@@ -8,6 +8,8 @@ from resources.user import UserRegister, UserLogin, User, TokenRefresh, UserLogo
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 
+from flask_socketio import SocketIO, send
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -19,7 +21,6 @@ app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = [
 ]  # allow blacklisting for access and refresh tokens
 app.secret_key = "jose"  # could do app.config['JWT_SECRET_KEY'] if we prefer
 api = Api(app)
-
 
 @app.before_first_request
 def create_tables():
@@ -110,6 +111,16 @@ api.add_resource(UserLogin, "/login")
 api.add_resource(TokenRefresh, "/refresh")
 api.add_resource(UserLogout, "/logout")
 
+
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+@socketio.on('message')
+def handleMessage(msg):
+    print('Message: ', msg)
+    send(msg, broadcast=True)
+
 if __name__ == "__main__":
     db.init_app(app)
+    socketio.run(app)
     app.run(port=5000, debug=True)
+
